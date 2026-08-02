@@ -1,0 +1,146 @@
+"use client";
+ 
+
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowRight } from "lucide-react";
+
+export function Hero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (imageRef.current && containerRef.current) {
+      gsap.to(imageRef.current, {
+        scale: 1.15,
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, []);
+
+  const [particles, setParticles] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Generate dust particles on the client only to avoid hydration mismatches
+    const generatedParticles = Array.from({ length: 30 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 20 + 10,
+      delay: Math.random() * 5,
+      animX: Math.random() * 50 - 25,
+    }));
+     
+    setParticles(generatedParticles);
+  }, []);
+
+  return (
+    <section 
+      ref={containerRef}
+      className="relative h-screen min-h-[800px] w-full overflow-hidden bg-brand-text flex items-center justify-center"
+    >
+      {/* Background Image with Parallax */}
+      <div className="absolute inset-0 w-full h-full">
+        <Image
+          ref={imageRef}
+          src="/images/hero.png"
+          alt="Luxury Living Room"
+          fill
+          priority
+          className="object-cover opacity-90 origin-center"
+          sizes="100vw"
+        />
+        
+        {/* Subtle warm sunlight gradient overlay */}
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-tr from-brand-gold/10 via-transparent to-brand-primary/5 mix-blend-overlay"
+          animate={{ opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+      </div>
+
+      {/* Dust Particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full bg-white/40 blur-[1px]"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
+            }}
+            animate={{
+              y: [0, -100, 0],
+              x: [0, p.animX, 0],
+              opacity: [0, 0.8, 0],
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              delay: p.delay,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 text-center px-6 md:px-12 max-w-5xl mx-auto flex flex-col items-center mt-20">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-brand-secondary/90 tracking-[0.2em] text-xs md:text-sm font-medium uppercase mb-6 block"
+        >
+          Curating the Art of Living
+        </motion.span>
+        
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.4 }}
+          className="font-heading text-5xl md:text-7xl lg:text-[100px] leading-[1.1] tracking-tight text-white mb-10"
+        >
+          Discover Exclusive <br className="hidden md:block" /> Home Decor
+        </motion.h1>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex justify-center mt-6"
+        >
+          <Link 
+            href="/collections"
+            className="group relative flex items-center justify-center gap-3 bg-white text-brand-text px-8 py-4 rounded-full font-button font-medium overflow-hidden transition-transform hover:scale-105"
+          >
+            <span className="relative z-10">Explore Collection</span>
+            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
