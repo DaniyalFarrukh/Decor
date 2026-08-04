@@ -26,6 +26,7 @@ export async function createCategory(formData: FormData) {
   }
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products", "layout");
   return { success: true };
 }
 
@@ -42,6 +43,7 @@ export async function deleteCategory(id: string) {
   }
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products", "layout");
   return { success: true };
 }
 
