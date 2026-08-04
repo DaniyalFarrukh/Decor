@@ -46,10 +46,73 @@ export async function getStorefrontProducts() {
   });
 }
 
+// Helper function for Levenshtein distance to detect typos
+function levenshteinDistance(a: string, b: string): number {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+
+  for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+  for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+
+  for (let j = 1; j <= b.length; j++) {
+    for (let i = 1; i <= a.length; i++) {
+      const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[j][i] = Math.min(
+        matrix[j][i - 1] + 1, // deletion
+        matrix[j - 1][i] + 1, // insertion
+        matrix[j - 1][i - 1] + indicator // substitution
+      );
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
+// Helper to check fuzzy match
+function isFuzzyMatch(text: string, query: string): boolean {
+  if (!text || !query) return false;
+  text = text.toLowerCase();
+  query = query.toLowerCase();
+  
+  // Exact or partial exact match
+  if (text.includes(query)) return true;
+  
+  // Split into words
+  const textWords = text.split(/[\s\-_,]+/);
+  const queryWords = query.split(/[\s\-_,]+/);
+  
+  // For each word in the query, see if there's a close match in the text
+  for (const qw of queryWords) {
+    if (qw.length < 3) continue; // Skip very short words for fuzzy matching
+    
+    let matched = false;
+    for (const tw of textWords) {
+      if (Math.abs(tw.length - qw.length) > 2) continue; // Too different in length
+      
+      const distance = levenshteinDistance(tw, qw);
+      // Allow 1 typo for 3-4 letter words, 2 typos for 5+ letter words
+      const maxDistance = qw.length <= 4 ? 1 : 2;
+      
+      if (distance <= maxDistance) {
+        matched = true;
+        break;
+      }
+    }
+    // If any significant query word fuzzily matches any text word, consider it a match
+    if (matched) return true;
+  }
+  
+  return false;
+}
+
 export async function searchStorefrontProducts(query: string) {
   if (!query) return [];
   
   const supabase = createAdminClient();
+
+  // Fetch all active products for in-memory fuzzy matching
   const { data, error } = await supabase
     .from("products")
     .select(`
@@ -62,16 +125,23 @@ export async function searchStorefrontProducts(query: string) {
       images:product_images(image_url),
       variants(id, name, stock_quantity, image_url, price_adjustment)
     `)
-    .eq("status", "active")
-    .or(`name.wfts.${query},description.wfts.${query}`);
+    .eq("status", "active");
 
   if (error) {
     console.error("Error searching products:", error);
     return [];
   }
 
+  // Filter using our fuzzy match function
+  const filteredData = data?.filter((p: any) => {
+    const categoryName = (p.category as any)?.name || "";
+    return isFuzzyMatch(p.name, query) || 
+           isFuzzyMatch(p.description, query) || 
+           isFuzzyMatch(categoryName, query);
+  });
+
   // Format the data to match the frontend components expectations
-  return data?.map((p: any) => {
+  return filteredData?.map((p: any) => {
     const minVariantPrice = p.variants?.length > 0 ? Math.min(...p.variants.map((v: any) => Number(v.price_adjustment))) : 0;
     const displayPrice = p.base_price > 0 
       ? `Rs. ${p.base_price.toLocaleString()}`
