@@ -57,6 +57,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (product: any) => {
     // If the product comes from the storefront, it has `images` array.
     // If it's already a CartItem being re-added, it has `image`.
+    if (product.inStock === false) {
+      return; // Safety check to prevent adding out of stock items
+    }
     const itemImage = product.image || (product.images && product.images[0]) || "";
     const qtyToAdd = product.quantity && product.quantity > 0 ? product.quantity : 1;
     

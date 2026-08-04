@@ -194,7 +194,6 @@ export async function updateProduct(id: string, formData: FormData) {
     const category_id = formData.get("category_id") as string || null;
     const status = formData.get("status") as string;
     
-    // Update Product
     const { error: productError } = await supabase
       .from("products")
       .update({ name, slug, description, base_price, category_id, status })
@@ -211,6 +210,67 @@ export async function updateProduct(id: string, formData: FormData) {
       await supabase.from("product_images").insert([
         { product_id: id, image_url: mainImageUrl, display_order: 1 }
       ]);
+    }
+
+    // Handle Variants
+    const variantIds = formData.getAll("variant_id[]") as string[];
+    const variantExistingImages = formData.getAll("variant_existing_image[]") as string[];
+    const variantNames = formData.getAll("variant_name[]") as string[];
+    const variantSkus = formData.getAll("variant_sku[]") as string[];
+    const variantPrices = formData.getAll("variant_price[]") as string[];
+    const variantQuantities = formData.getAll("variant_quantity[]") as string[];
+    const variantImages = formData.getAll("variant_image[]") as File[];
+
+    const submittedVariantIds = variantIds.filter(vId => vId && vId !== "");
+    
+    // Delete any variants that were removed
+    if (submittedVariantIds.length > 0) {
+      // Supabase JS .not('id', 'in', `(${...})`) requires a proper format.
+      // Easiest is to fetch all current variants, and delete the ones not in submittedVariantIds
+      const { data: existingVariants } = await supabase.from("variants").select("id").eq("product_id", id);
+      if (existingVariants) {
+        const toDelete = existingVariants.filter(ev => !submittedVariantIds.includes(ev.id)).map(ev => ev.id);
+        if (toDelete.length > 0) {
+          await supabase.from("order_items").delete().in("variant_id", toDelete);
+          await supabase.from("variants").delete().in("id", toDelete);
+        }
+      }
+    } else {
+      // All variants were removed
+      const { data: existingVariants } = await supabase.from("variants").select("id").eq("product_id", id);
+      if (existingVariants && existingVariants.length > 0) {
+        const toDelete = existingVariants.map(ev => ev.id);
+        await supabase.from("order_items").delete().in("variant_id", toDelete);
+        await supabase.from("variants").delete().eq("product_id", id);
+      }
+    }
+
+    // Upsert variants
+    if (variantNames.length > 0) {
+      for (let i = 0; i < variantNames.length; i++) {
+        const vId = variantIds[i];
+        let vImageUrl = variantExistingImages[i] || null;
+        
+        if (variantImages[i] && variantImages[i].size > 0) {
+          const uploadedUrl = await uploadImage(variantImages[i]);
+          if (uploadedUrl) vImageUrl = uploadedUrl;
+        }
+        
+        const variantData = {
+          product_id: id,
+          name: variantNames[i],
+          sku: variantSkus[i] || `${slug}-${i}`,
+          price_adjustment: parseFloat(variantPrices[i] || "0"),
+          stock_quantity: parseInt(variantQuantities[i] || "0", 10),
+          image_url: vImageUrl
+        };
+
+        if (vId && vId !== "") {
+          await supabase.from("variants").update(variantData).eq("id", vId);
+        } else {
+          await supabase.from("variants").insert([variantData]);
+        }
+      }
     }
 
     revalidatePath("/admin/products");

@@ -12,6 +12,7 @@ export async function getStorefrontProducts() {
       id,
       name,
       base_price,
+      stock_quantity,
       status,
       category:categories(name),
       images:product_images(image_url),
@@ -119,6 +120,7 @@ export async function searchStorefrontProducts(query: string) {
       id,
       name,
       base_price,
+      stock_quantity,
       description,
       status,
       category:categories(name),
@@ -171,6 +173,7 @@ export async function getStorefrontProduct(id: string) {
       name,
       description,
       base_price,
+      stock_quantity,
       status,
       category:categories(name),
       images:product_images(image_url),
@@ -204,7 +207,7 @@ export async function getStorefrontProduct(id: string) {
     })) || [],
     inStock: data.variants && data.variants.length > 0 
       ? data.variants.reduce((sum: number, v: any) => sum + (v.stock_quantity || 0), 0) > 0
-      : true, // Default to true if variants aren't populated yet
+      : true,
   };
 }
 

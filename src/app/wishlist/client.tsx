@@ -64,13 +64,22 @@ export default function WishlistPage() {
                 </Link>
                 
                 <div className="flex gap-2 mt-4 pt-4 border-t border-dashed">
-                  <button 
-                    onClick={() => addToCart(product)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-brand-text text-white py-2 rounded-md font-button text-xs font-semibold hover:bg-brand-gold transition-colors"
-                  >
-                    <ShoppingBag className="w-3 h-3" />
-                    Move to Cart
-                  </button>
+                  {product.inStock === false ? (
+                    <button 
+                      disabled
+                      className="flex-1 flex items-center justify-center gap-2 bg-brand-text/50 text-white py-2 rounded-md font-button text-xs font-semibold cursor-not-allowed"
+                    >
+                      Out of Stock
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => addToCart(product)}
+                      className="flex-1 flex items-center justify-center gap-2 bg-brand-text text-white py-2 rounded-md font-button text-xs font-semibold hover:bg-brand-gold transition-colors"
+                    >
+                      <ShoppingBag className="w-3 h-3" />
+                      Move to Cart
+                    </button>
+                  )}
                   <button 
                     onClick={() => toggleWishlist(product)}
                     className="px-3 py-2 border rounded-md text-muted-foreground hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors"

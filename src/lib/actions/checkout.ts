@@ -78,12 +78,23 @@ export async function processCheckout(formData: FormData, cartItems: any[], rawT
     // 3. Create Order Items
     const orderItemsToInsert = cartItems.map(item => ({
       order_id: order.id,
-      variant_id: null, // If variants were fully integrated we'd pass it
+      variant_id: item.variant?.id || null, 
       quantity: item.quantity,
       price_at_time: item.rawPrice || 0
     }));
 
     await supabase.from("order_items").insert(orderItemsToInsert);
+
+    // 4. Decrement Stock
+    for (const item of cartItems) {
+      if (item.variant?.id) {
+        // Decrement variant stock
+        const { data: variantData } = await supabase.from("variants").select("stock_quantity").eq("id", item.variant.id).single();
+        if (variantData) {
+          await supabase.from("variants").update({ stock_quantity: Math.max(0, variantData.stock_quantity - item.quantity) }).eq("id", item.variant.id);
+        }
+      }
+    }
 
     // 4. Send Emails using centralized logic
     await sendCheckoutEmail({

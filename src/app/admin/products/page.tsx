@@ -52,6 +52,7 @@ export default async function ProductsPage() {
                         <th className="px-4 py-3 font-medium whitespace-nowrap">Price</th>
                         <th className="px-4 py-3 font-medium whitespace-nowrap">Status</th>
                         <th className="px-4 py-3 font-medium whitespace-nowrap">Variants</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Stock</th>
                         <th className="px-4 py-3 font-medium whitespace-nowrap text-right">Actions</th>
                       </tr>
                     </thead>
@@ -74,6 +75,11 @@ export default async function ProductsPage() {
                           </td>
                           <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                             {product.variants?.length || 0}
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap font-medium">
+                            {product.variants && product.variants.length > 0 
+                              ? product.variants.reduce((sum: number, v: any) => sum + (v.stock_quantity || 0), 0)
+                              : (product.stock_quantity || 0)}
                           </td>
                           <td className="px-4 py-3 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-2">

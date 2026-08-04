@@ -46,6 +46,7 @@ CREATE TABLE products (
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
   base_price NUMERIC(10, 2) NOT NULL,
+  stock_quantity INTEGER DEFAULT 0,
   category_id UUID REFERENCES categories(id),
   is_featured BOOLEAN DEFAULT FALSE,
   status product_status DEFAULT 'draft',

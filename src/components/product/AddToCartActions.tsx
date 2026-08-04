@@ -37,6 +37,13 @@ export function AddToCartActions({ product, selectedVariant }: { product: any, s
         >
           Out of Stock
         </button>
+        <button 
+          onClick={() => toggleWishlist(product)}
+          className="h-12 w-12 flex items-center justify-center border border-brand-border text-brand-text hover:text-brand-gold transition-colors shrink-0"
+          aria-label="Toggle Wishlist"
+        >
+          <Heart className="w-5 h-5" fill={isWishlisted ? "currentColor" : "none"} />
+        </button>
       </div>
     );
   }
