@@ -4,6 +4,8 @@ import { CategorySlider } from "@/components/home/BestSellers";
 import { Footer } from "@/components/layout/Footer";
 import { getStorefrontProducts } from "@/lib/actions/storefront";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const products = await getStorefrontProducts();
 
