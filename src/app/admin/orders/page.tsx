@@ -33,21 +33,21 @@ export default async function OrdersPage() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-muted/50 text-muted-foreground border-b">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Order ID</th>
-                    <th className="px-4 py-3 font-medium">Customer</th>
-                    <th className="px-4 py-3 font-medium">Date</th>
-                    <th className="px-4 py-3 font-medium">Total</th>
-                    <th className="px-4 py-3 font-medium">Items</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Order ID</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Customer</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Total</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Items</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order: any) => (
                     <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs">
+                      <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">
                         {order.id.split('-')[0].toUpperCase()}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium">
                           {order.customer?.first_name} {order.customer?.last_name}
                         </div>
@@ -55,16 +55,16 @@ export default async function OrdersPage() {
                           {order.customer?.email}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 font-bold">
+                      <td className="px-6 py-4 font-bold whitespace-nowrap">
                         Rs. {order.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
                         {order.items?.length || 0} items
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
                       </td>
                     </tr>

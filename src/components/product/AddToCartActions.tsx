@@ -2,23 +2,30 @@
  
 
 import { useState } from "react";
-import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/components/cart/CartContext";
 
-export function AddToCartActions({ product }: { product: any }) {
+export function AddToCartActions({ product, selectedVariant }: { product: any, selectedVariant?: any }) {
   const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const { addToCart, toggleWishlist, wishlistItems } = useCart();
+  const isWishlisted = wishlistItems.some((item) => item.id === product.id);
 
   const handleDecrease = () => setQuantity(q => Math.max(1, q - 1));
   const handleIncrease = () => setQuantity(q => q + 1);
 
   const handleAdd = () => {
-    // Add multiple items if quantity > 1
-    // The cart context currently increments by 1 if existing, 
-    // or adds { quantity: 1 }. We can pass quantity if we update CartContext,
-    // or just call addToCart multiple times (hacky).
-    // Let's just modify the cart context later if needed, but for now we'll pass quantity inside the product object.
-    addToCart({ ...product, quantity });
+    // If a variant is selected, create a custom payload merging product and variant details
+    const cartItem = selectedVariant ? {
+      ...product,
+      id: `${product.id}-${selectedVariant.id}`, // Unique ID for cart matching
+      name: `${product.name} - ${selectedVariant.name}`,
+      rawPrice: Number(selectedVariant.price_adjustment),
+      price: `Rs. ${Number(selectedVariant.price_adjustment).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      image: selectedVariant.image_url,
+      variant: selectedVariant
+    } : product;
+
+    addToCart({ ...cartItem, quantity });
   };
 
   if (!product.inStock) {
@@ -26,7 +33,7 @@ export function AddToCartActions({ product }: { product: any }) {
       <div className="flex items-center gap-4 mb-8">
         <button 
           disabled
-          className="flex-1 h-12 bg-brand-text/50 text-white font-button font-medium flex items-center justify-center gap-2 cursor-not-allowed uppercase tracking-widest"
+          className="flex-1 h-12 bg-brand-text/50 text-white font-button font-medium text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed uppercase tracking-wider sm:tracking-widest whitespace-nowrap"
         >
           Out of Stock
         </button>
@@ -53,9 +60,17 @@ export function AddToCartActions({ product }: { product: any }) {
       </div>
       <button 
         onClick={handleAdd}
-        className="flex-1 h-12 bg-brand-text text-white font-button font-medium flex items-center justify-center gap-2 hover:bg-brand-gold transition-colors uppercase tracking-widest"
+        className="flex-1 h-12 bg-brand-text text-white font-button font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-brand-gold transition-colors uppercase tracking-wider sm:tracking-widest whitespace-nowrap px-2"
       >
-        <ShoppingBag className="w-4 h-4" /> Add to Cart
+        <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> 
+        <span>Add to Cart</span>
+      </button>
+      <button 
+        onClick={() => toggleWishlist(product)}
+        className="h-12 w-12 flex items-center justify-center border border-brand-border text-brand-text hover:text-brand-gold transition-colors shrink-0"
+        aria-label="Toggle Wishlist"
+      >
+        <Heart className="w-5 h-5" fill={isWishlisted ? "currentColor" : "none"} />
       </button>
     </div>
   );

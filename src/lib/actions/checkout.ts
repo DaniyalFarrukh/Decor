@@ -4,7 +4,7 @@
 import { createAdminClient } from "@/utils/supabase/server";
 import { sendCheckoutEmail } from "@/lib/email";
 
-export async function processCheckout(formData: FormData, cartItems: any[], totalAmount: number) {
+export async function processCheckout(formData: FormData, cartItems: any[], rawTotal: number, couponCode?: string) {
   try {
     const email = formData.get("email") as string;
     const firstName = formData.get("firstName") as string;
@@ -34,14 +34,36 @@ export async function processCheckout(formData: FormData, cartItems: any[], tota
       return { success: false, error: "Failed to save address." };
     }
 
+    // Fetch coupons to validate on the server
+    let discountAmount = 0;
+    let finalTotal = rawTotal;
+    
+    if (couponCode) {
+      const { data: configData } = await supabase.storage.from("config").download("coupons.json");
+      if (configData) {
+        try {
+          const couponsText = await configData.text();
+          const coupons = JSON.parse(couponsText);
+          const validCoupon = coupons.find((c: any) => c.code === couponCode && c.active);
+          
+          if (validCoupon) {
+            discountAmount = Math.round(rawTotal * (validCoupon.discount_percentage / 100));
+            finalTotal = rawTotal - discountAmount;
+          }
+        } catch (e) {
+          console.error("Failed to parse coupons", e);
+        }
+      }
+    }
+
     // 2. Create Order
     const { data: order, error: orderError } = await supabase.from("orders").insert({
       customer_id: null, // Guest checkout
       status: "pending",
-      subtotal: totalAmount,
+      subtotal: rawTotal,
       shipping_cost: 0,
-      discount_amount: 0,
-      total_amount: totalAmount,
+      discount_amount: discountAmount,
+      total_amount: finalTotal,
       shipping_address_id: addressObj.id,
       guest_email: email,
       guest_name: `${firstName} ${lastName}`,
@@ -72,7 +94,7 @@ export async function processCheckout(formData: FormData, cartItems: any[], tota
       city,
       postalCode,
       phone,
-      totalAmount,
+      totalAmount: finalTotal,
       cartItems
     });
 

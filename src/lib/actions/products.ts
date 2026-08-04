@@ -24,7 +24,8 @@ export async function createProduct(formData: FormData) {
     const name = formData.get("name") as string;
     const slug = name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
     const description = formData.get("description") as string;
-    const base_price = parseFloat(formData.get("base_price") as string);
+    const basePriceStr = formData.get("base_price") as string;
+    const base_price = basePriceStr ? parseFloat(basePriceStr) : 0;
     const category_id = formData.get("category_id") as string || null;
     const is_featured = formData.get("is_featured") === "on";
     const status = formData.get("status") as string;
@@ -123,6 +124,20 @@ export async function getProducts() {
 
 export async function deleteProduct(id: string) {
   const supabase = createAdminClient();
+  
+  // Find variants to clean up foreign keys that don't cascade (like order_items)
+  const { data: variants } = await supabase.from("variants").select("id").eq("product_id", id);
+  if (variants && variants.length > 0) {
+    const variantIds = variants.map(v => v.id);
+    // Nullify or delete references in order_items
+    await supabase.from("order_items").delete().in("variant_id", variantIds);
+  }
+
+  // First delete any relations to avoid foreign key constraints (fallback if cascade is missing)
+  await supabase.from("variants").delete().eq("product_id", id);
+  await supabase.from("product_images").delete().eq("product_id", id);
+  await supabase.from("reviews").delete().eq("product_id", id);
+
   const { error } = await supabase
     .from("products")
     .delete()
@@ -174,7 +189,8 @@ export async function updateProduct(id: string, formData: FormData) {
     const name = formData.get("name") as string;
     const slug = name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
     const description = formData.get("description") as string;
-    const base_price = parseFloat(formData.get("base_price") as string);
+    const basePriceStr = formData.get("base_price") as string;
+    const base_price = basePriceStr ? parseFloat(basePriceStr) : 0;
     const category_id = formData.get("category_id") as string || null;
     const status = formData.get("status") as string;
     

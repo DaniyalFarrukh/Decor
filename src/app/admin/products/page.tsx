@@ -47,23 +47,23 @@ export default async function ProductsPage() {
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted/50 text-muted-foreground border-b">
                       <tr>
-                        <th className="px-4 py-3 font-medium">Name</th>
-                        <th className="px-4 py-3 font-medium">Category</th>
-                        <th className="px-4 py-3 font-medium">Price</th>
-                        <th className="px-4 py-3 font-medium">Status</th>
-                        <th className="px-4 py-3 font-medium">Variants</th>
-                        <th className="px-4 py-3 font-medium text-right">Actions</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Name</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Category</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Price</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Status</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">Variants</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {products.map((product: any) => (
                         <tr key={product.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                          <td className="px-4 py-3 font-medium">{product.name}</td>
-                          <td className="px-4 py-3 text-muted-foreground">
+                          <td className="px-4 py-3 font-medium whitespace-nowrap">{product.name}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                             {product.category ? product.category.name : "None"}
                           </td>
-                          <td className="px-4 py-3">Rs. {product.base_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 whitespace-nowrap">Rs. {product.base_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               product.status === 'active' ? 'bg-green-100 text-green-700' :
                               product.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
@@ -72,10 +72,10 @@ export default async function ProductsPage() {
                               {product.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-muted-foreground">
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                             {product.variants?.length || 0}
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-4 py-3 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-2">
                               <Link 
                                 href={`/admin/products/${product.id}/edit`}

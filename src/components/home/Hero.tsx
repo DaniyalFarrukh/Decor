@@ -1,7 +1,7 @@
 "use client";
  
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -34,23 +34,6 @@ export function Hero() {
     };
   }, []);
 
-  const [particles, setParticles] = useState<any[]>([]);
-
-  useEffect(() => {
-    // Generate dust particles on the client only to avoid hydration mismatches
-    const generatedParticles = Array.from({ length: 30 }).map((_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 20 + 10,
-      delay: Math.random() * 5,
-      animX: Math.random() * 50 - 25,
-    }));
-     
-    setParticles(generatedParticles);
-  }, []);
-
   return (
     <section 
       ref={containerRef}
@@ -77,33 +60,6 @@ export function Hero() {
         
         {/* Vignette */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-      </div>
-
-      {/* Dust Particles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {particles.map((p) => (
-          <motion.div
-            key={p.id}
-            className="absolute rounded-full bg-white/40 blur-[1px]"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: p.size,
-              height: p.size,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, p.animX, 0],
-              opacity: [0, 0.8, 0],
-            }}
-            transition={{
-              duration: p.duration,
-              repeat: Infinity,
-              delay: p.delay,
-              ease: "linear",
-            }}
-          />
-        ))}
       </div>
 
       {/* Content */}

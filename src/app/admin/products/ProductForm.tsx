@@ -1,21 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { createProduct } from "@/lib/actions/products";
 
 export default function ProductForm({ categories }: { categories: any[] }) {
-  const [variants, setVariants] = useState([{ name: "", sku: "", price: "0", quantity: "0" }]);
+  const [variants, setVariants] = useState([{ name: "", sku: "", price: "0", quantity: "0", hasImage: false }]);
+  const [hasImage, setHasImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const addVariant = () => {
-    setVariants([...variants, { name: "", sku: "", price: "0", quantity: "0" }]);
+    setVariants([...variants, { name: "", sku: "", price: "0", quantity: "0", hasImage: false }]);
   };
 
   const removeVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const updateVariant = (index: number, field: string, value: string) => {
+  const updateVariant = (index: number, field: string, value: string | boolean) => {
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
     setVariants(newVariants);
@@ -55,13 +57,32 @@ export default function ProductForm({ categories }: { categories: any[] }) {
 
       <div className="space-y-2">
         <label htmlFor="image" className="text-sm font-medium">Main Product Image</label>
-        <input 
-          type="file" 
-          id="image" 
-          name="image" 
-          accept="image/*"
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        />
+        <div className="flex items-center gap-2">
+          <input 
+            type="file" 
+            id="image" 
+            name="image" 
+            accept="image/*"
+            ref={imageInputRef}
+            onChange={(e) => setHasImage(!!e.target.files?.length)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          {hasImage && (
+            <button
+              type="button"
+              onClick={() => {
+                if (imageInputRef.current) {
+                  imageInputRef.current.value = "";
+                  setHasImage(false);
+                }
+              }}
+              className="p-2 h-10 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors border border-input flex items-center justify-center shrink-0"
+              title="Remove image"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -77,13 +98,12 @@ export default function ProductForm({ categories }: { categories: any[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label htmlFor="base_price" className="text-sm font-medium">Base Price (Rs.)</label>
+          <label htmlFor="base_price" className="text-sm font-medium">Base Price (Optional, Rs.)</label>
           <input 
             type="number" 
             step="0.01"
             id="base_price" 
             name="base_price" 
-            required 
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="0.00"
           />
@@ -103,7 +123,7 @@ export default function ProductForm({ categories }: { categories: any[] }) {
       </div>
 
       <div className="space-y-6 pt-6 border-t mt-8">
-        <div className="flex justify-between items-center bg-muted/30 p-4 rounded-lg border border-dashed">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-muted/30 p-4 rounded-lg border border-dashed">
           <div>
             <h3 className="text-lg font-semibold tracking-tight">Product Variants</h3>
             <p className="text-sm text-muted-foreground mt-1">Add variations like Color, Size, or Material</p>
@@ -111,9 +131,9 @@ export default function ProductForm({ categories }: { categories: any[] }) {
           <button 
             type="button" 
             onClick={addVariant}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 shadow-sm"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 shadow-sm whitespace-nowrap shrink-0 w-full sm:w-auto"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4 shrink-0" />
             Add Variant
           </button>
         </div>
@@ -165,9 +185,9 @@ export default function ProductForm({ categories }: { categories: any[] }) {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Price Adj. (Rs.)</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variant Price (Rs.)</label>
                     <input 
                       type="number" 
                       step="0.01"
@@ -194,12 +214,32 @@ export default function ProductForm({ categories }: { categories: any[] }) {
                 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Image (Optional)</label>
-                  <input 
-                    type="file" 
-                    name="variant_image[]" 
-                    accept="image/*"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="file" 
+                      id={`variant_image_${index}`}
+                      name="variant_image[]" 
+                      accept="image/*"
+                      onChange={(e) => updateVariant(index, 'hasImage', !!e.target.files?.length)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    />
+                    {v.hasImage && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById(`variant_image_${index}`) as HTMLInputElement;
+                          if (input) {
+                            input.value = "";
+                            updateVariant(index, 'hasImage', false);
+                          }
+                        }}
+                        className="p-2 h-10 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors border border-input flex items-center justify-center shrink-0"
+                        title="Remove image"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
  
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createCategory, getCategories } from "@/lib/actions/categories";
+import { createCategory, getCategories, deleteCategory } from "@/lib/actions/categories";
 import { FolderTree, Plus, Trash2 } from "lucide-react";
 
 export default async function CategoriesPage() {
@@ -77,7 +77,7 @@ export default async function CategoriesPage() {
                   <p className="text-sm">Create your first category using the form.</p>
                 </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted/50 text-muted-foreground border-b">
                       <tr>
@@ -98,7 +98,6 @@ export default async function CategoriesPage() {
                           <td className="px-4 py-3 text-right">
                             <form action={async () => {
                               "use server";
-                              const { deleteCategory } = await import("@/lib/actions/categories");
                               await deleteCategory(cat.id);
                             }}>
                               <button type="submit" className="text-red-500 hover:text-red-700 transition-colors">

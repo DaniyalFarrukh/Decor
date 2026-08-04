@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export function CartDrawer() {
-  const { isCartOpen, setIsCartOpen, items, addToCart, removeFromCart } = useCart();
+  const { isCartOpen, setIsCartOpen, items, addToCart, removeFromCart, updateQuantity } = useCart();
 
   if (!isCartOpen) return null;
 
@@ -48,8 +48,12 @@ export function CartDrawer() {
           ) : (
             items.map((item) => (
               <div key={item.id} className="flex gap-4">
-                <div className="relative w-24 h-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                  <Image src={item.image || "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&q=80&w=600"} alt={item.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                <div className="relative w-24 h-24 rounded-md overflow-hidden bg-muted flex-shrink-0 border border-brand-text/10">
+                  <img 
+                    src={item.image || "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&q=80&w=600"} 
+                    alt={item.name} 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
@@ -60,13 +64,7 @@ export function CartDrawer() {
                     <div className="flex items-center border rounded-md">
                       <button 
                         className="px-2 py-1 text-muted-foreground hover:text-foreground"
-                        onClick={() => {
-                          if (item.quantity > 1) {
-                            // Quick hack to decrement: addToCart with -1 is complex, just add updateQuantity to context ideally, but here we can just do removeFromCart and re-add or implement updateQuantity.
-                            // For now, let's just use removeFromCart if we need to remove it completely.
-                            // We will add updateQuantity if needed, or just let them delete.
-                          }
-                        }}
+                        onClick={() => updateQuantity(item.id, -1)}
                         disabled={item.quantity <= 1}
                       >
                         <Minus className="w-3 h-3" />
@@ -74,7 +72,7 @@ export function CartDrawer() {
                       <span className="text-xs px-2 font-medium">{item.quantity}</span>
                       <button 
                         className="px-2 py-1 text-muted-foreground hover:text-foreground"
-                        onClick={() => addToCart(item)}
+                        onClick={() => updateQuantity(item.id, 1)}
                       >
                         <Plus className="w-3 h-3" />
                       </button>

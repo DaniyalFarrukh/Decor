@@ -44,34 +44,35 @@ export function CategorySlider({
 
   return (
     <section className="py-24 md:py-32 bg-brand-secondary overflow-hidden">
-      <div className="px-6 md:px-12 max-w-[1600px] mx-auto mb-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div>
-            <h2 className="font-heading text-4xl md:text-5xl text-brand-text mb-4">
-              {title}
-            </h2>
-            <p className="font-sans text-brand-text/70 max-w-md">
-              {description}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Link 
-              href={`/category/${title.toLowerCase().replace(/\s+/g, '-')}`}
-              className="font-button text-sm uppercase tracking-widest font-semibold border-b border-brand-text pb-1 hover:text-brand-gold hover:border-brand-gold transition-colors"
-            >
-              Shop {title}
-            </Link>
+      <div className="max-w-[1600px] mx-auto w-full">
+        <div className="px-6 md:px-12 mb-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+              <h2 className="font-heading text-4xl md:text-5xl text-brand-text mb-4">
+                {title}
+              </h2>
+              <p className="font-sans text-brand-text/70 max-w-md">
+                {description}
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <Link 
+                href={`/category/${title.toLowerCase().replace(/\s+/g, '-')}`}
+                className="font-button text-sm uppercase tracking-widest font-semibold border-b border-brand-text pb-1 hover:text-brand-gold hover:border-brand-gold transition-colors"
+              >
+                Shop {title}
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div ref={containerRef} className="cursor-grab active:cursor-grabbing w-full pl-6 md:pl-12">
-        <motion.div
-          drag={width > 0 ? "x" : false}
-          dragConstraints={{ right: 0, left: -width }}
-          className="flex gap-6 md:gap-8 w-max"
-          style={{ touchAction: "pan-y" }}
-        >
+        <div ref={containerRef} className="cursor-grab active:cursor-grabbing w-full px-6 md:px-12">
+          <motion.div
+            drag={width > 0 ? "x" : false}
+            dragConstraints={{ right: 0, left: -width }}
+            className="flex gap-6 md:gap-8 w-max"
+            style={{ touchAction: "pan-y" }}
+          >
           {displayItems.length === 0 ? (
             <div className="w-full text-center py-12 text-brand-text/50">
               No products found. Add products in the admin dashboard.
@@ -133,15 +134,13 @@ export function CategorySlider({
                     )}
                   </div>
                   
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-brand-text/50 text-xs uppercase tracking-wider font-semibold mb-2">
-                        {product.category}
-                      </p>
-                      <h3 className="font-heading text-xl text-brand-text group-hover:text-brand-gold transition-colors">
-                        {product.name}
-                      </h3>
-                    </div>
+                  <div className="flex flex-col text-left">
+                    <p className="text-brand-text/50 text-xs uppercase tracking-wider font-semibold mb-1">
+                      {product.category}
+                    </p>
+                    <h3 className="font-heading text-lg md:text-xl text-brand-text group-hover:text-brand-gold transition-colors mb-1 truncate">
+                      {product.name}
+                    </h3>
                     <span className="font-sans font-medium text-brand-text">
                       {product.price}
                     </span>
@@ -151,6 +150,7 @@ export function CategorySlider({
             ))
           )}
         </motion.div>
+      </div>
       </div>
     </section>
   );

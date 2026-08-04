@@ -21,6 +21,8 @@ type CartContextType = {
   setIsCartOpen: (isOpen: boolean) => void;
   wishlistItems: any[];
   toggleWishlist: (product: any) => void;
+  clearCart: () => void;
+  updateQuantity: (id: string, delta: number) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -34,18 +36,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
      
     setMounted(true);
-    const savedCart = localStorage.getItem("decornish_cart");
     const savedWishlist = localStorage.getItem("decornish_wishlist");
-    if (savedCart) {
-      try {
-        const parsed = JSON.parse(savedCart);
-        // Filter out old legacy cart items that don't have the new rawPrice field
-        const validItems = parsed.filter((item: any) => typeof item.rawPrice === 'number');
-        setItems(validItems);
-      } catch (e) {
-        console.error("Error parsing cart", e);
-      }
-    }
     if (savedWishlist) {
       try {
         setWishlistItems(JSON.parse(savedWishlist));
@@ -57,23 +48,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem("decornish_cart", JSON.stringify(items));
       localStorage.setItem("decornish_wishlist", JSON.stringify(wishlistItems));
+      // Clean up legacy cart persistence if it exists
+      localStorage.removeItem("decornish_cart");
     }
-  }, [items, wishlistItems, mounted]);
+  }, [wishlistItems, mounted]);
 
   const addToCart = (product: any) => {
+    // If the product comes from the storefront, it has `images` array.
+    // If it's already a CartItem being re-added, it has `image`.
+    const itemImage = product.image || (product.images && product.images[0]) || "";
+    const qtyToAdd = product.quantity && product.quantity > 0 ? product.quantity : 1;
+    
     setItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + qtyToAdd } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, image: itemImage, quantity: qtyToAdd }];
     });
     // Optional: open the cart when adding an item
     setIsCartOpen(true);
+  };
+
+  const updateQuantity = (id: string, delta: number) => {
+    setItems((prev) => prev.map((item) => {
+      if (item.id === id) {
+        const newQuantity = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    }));
   };
 
   const removeFromCart = (id: string) => {
@@ -90,10 +97,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const clearCart = () => {
+    setItems([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("decornish_cart");
+    }
+  };
+
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, cartCount, isCartOpen, setIsCartOpen, wishlistItems, toggleWishlist }}>
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, cartCount, isCartOpen, setIsCartOpen, wishlistItems, toggleWishlist, clearCart, updateQuantity }}>
       {children}
     </CartContext.Provider>
   );
