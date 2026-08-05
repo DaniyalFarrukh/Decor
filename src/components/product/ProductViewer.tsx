@@ -73,13 +73,24 @@ export function ProductViewer({ product }: { product: any }) {
                       setSelectedVariantId(variant.id);
                       if (variant.image_url) setMainImage(variant.image_url);
                     }}
-                    className={`px-4 py-2 border text-sm font-medium transition-colors ${
+                    className={`flex flex-col items-center justify-between gap-2 p-2 border transition-colors min-w-[70px] ${
                       isSelected 
                         ? 'border-brand-gold bg-brand-gold/10 text-brand-text' 
                         : 'border-brand-border text-brand-text/70 hover:border-brand-text hover:text-brand-text'
                     }`}
                   >
-                    {variant.name}
+                    <span className="text-xs font-medium w-full text-center px-1">
+                      {variant.name}
+                    </span>
+                    {variant.image_url && (
+                      <div className="w-14 h-14 relative bg-brand-secondary overflow-hidden shrink-0 border border-brand-border/30">
+                        <img 
+                          src={variant.image_url} 
+                          alt={variant.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                   </button>
                 );
               })}

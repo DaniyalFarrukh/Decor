@@ -78,21 +78,7 @@ export default function EditProductForm({ product, categories }: { product: any,
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="image" className="text-sm font-medium">Update Main Image (Optional)</label>
-        {product.images?.[0]?.image_url && (
-          <div className="mb-2">
-            <img src={product.images[0].image_url} alt="Current" className="h-20 w-20 object-cover rounded-md border" />
-          </div>
-        )}
-        <input 
-          type="file" 
-          id="image" 
-          name="image" 
-          accept="image/*"
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-        />
-      </div>
+
 
       <div className="space-y-2">
         <label htmlFor="description" className="text-sm font-medium">Description</label>

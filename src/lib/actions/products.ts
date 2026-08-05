@@ -52,14 +52,7 @@ export async function createProduct(formData: FormData) {
       return { error: productError?.message || "Failed to create product" };
     }
 
-    // Handle Main Image
-    const mainImage = formData.get("image") as File;
-    const mainImageUrl = await uploadImage(mainImage);
-    if (mainImageUrl) {
-      await supabase.from("product_images").insert([
-        { product_id: product.id, image_url: mainImageUrl, display_order: 1 }
-      ]);
-    }
+
 
     // Handle Variants
     const variantNames = formData.getAll("variant_name[]") as string[];
@@ -201,16 +194,7 @@ export async function updateProduct(id: string, formData: FormData) {
 
     if (productError) return { error: productError.message };
 
-    // Handle Main Image (Update if new one is provided)
-    const mainImage = formData.get("image") as File;
-    const mainImageUrl = await uploadImage(mainImage);
-    if (mainImageUrl) {
-      // delete old image and insert new
-      await supabase.from("product_images").delete().eq("product_id", id);
-      await supabase.from("product_images").insert([
-        { product_id: id, image_url: mainImageUrl, display_order: 1 }
-      ]);
-    }
+
 
     // Handle Variants
     const variantIds = formData.getAll("variant_id[]") as string[];

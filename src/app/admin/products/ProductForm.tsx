@@ -6,8 +6,6 @@ import { createProduct } from "@/lib/actions/products";
 
 export default function ProductForm({ categories }: { categories: any[] }) {
   const [variants, setVariants] = useState([{ name: "", sku: "", price: "0", quantity: "0", hasImage: false }]);
-  const [hasImage, setHasImage] = useState(false);
-  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const addVariant = () => {
     setVariants([...variants, { name: "", sku: "", price: "0", quantity: "0", hasImage: false }]);
@@ -55,35 +53,7 @@ export default function ProductForm({ categories }: { categories: any[] }) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="image" className="text-sm font-medium">Main Product Image</label>
-        <div className="flex items-center gap-2">
-          <input 
-            type="file" 
-            id="image" 
-            name="image" 
-            accept="image/*"
-            ref={imageInputRef}
-            onChange={(e) => setHasImage(!!e.target.files?.length)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-          {hasImage && (
-            <button
-              type="button"
-              onClick={() => {
-                if (imageInputRef.current) {
-                  imageInputRef.current.value = "";
-                  setHasImage(false);
-                }
-              }}
-              className="p-2 h-10 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors border border-input flex items-center justify-center shrink-0"
-              title="Remove image"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </div>
+
 
       <div className="space-y-2">
         <label htmlFor="description" className="text-sm font-medium">Description</label>

@@ -60,20 +60,27 @@ export function Navbar() {
           : "bg-transparent"
       )}
     >
-      {/* Top Announcement Bar - Scrolling Left to Right */}
-      <div className="w-full bg-brand-text text-brand-primary overflow-hidden flex items-center py-1.5 md:py-2">
+      {/* Top Announcement Bar - Static */}
+      <div className="w-full bg-brand-text text-brand-primary flex items-center justify-center py-2 md:py-2.5">
+        <span className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">
+          Premium Quality Guarantee
+        </span>
+      </div>
+
+      {/* Contact Bar - Scrolling Left to Right */}
+      <div className="w-full bg-brand-gold text-white overflow-hidden flex items-center py-1.5 md:py-2">
         <div 
-          className="animate-[scroll-reverse_20s_linear_infinite] whitespace-nowrap flex text-[10px] md:text-xs font-semibold tracking-widest uppercase"
+          className="animate-[scroll-reverse_30s_linear_infinite] whitespace-nowrap flex text-[10px] md:text-xs font-semibold tracking-widest uppercase"
           style={{ willChange: 'transform' }}
         >
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
-          <span className="px-8 flex-shrink-0">WhatsApp us: +92 3289111139</span>
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="flex items-center px-6 flex-shrink-0 gap-6">
+              <span>WhatsApp: +92 3289111139</span>
+              <span className="w-1 h-1 rounded-full bg-white/50" />
+              <span>Email: Decornish.pk@gmail.com</span>
+              <span className="w-1 h-1 rounded-full bg-white/50" />
+            </div>
+          ))}
         </div>
       </div>
 
