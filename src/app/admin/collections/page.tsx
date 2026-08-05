@@ -29,9 +29,9 @@ export default async function CollectionsPage() {
             <Card key={product.id} className="overflow-hidden flex flex-col hover:border-primary/50 transition-colors">
               {/* Product Image */}
               <div className="aspect-square bg-muted flex items-center justify-center border-b relative overflow-hidden">
-                {product.images && product.images.length > 0 ? (
+                {product.images?.[0]?.image_url || product.variants?.find((v: any) => v.image_url)?.image_url ? (
                   <img 
-                    src={product.images[0].image_url} 
+                    src={product.images?.[0]?.image_url || product.variants?.find((v: any) => v.image_url)?.image_url} 
                     alt={product.name} 
                     className="object-cover w-full h-full"
                   />
